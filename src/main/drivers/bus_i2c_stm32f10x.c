@@ -437,11 +437,11 @@ void i2cInit(I2CDevice device)
     i2cInit.I2C_Ack = I2C_Ack_Enable;
     i2cInit.I2C_AcknowledgedAddress = I2C_AcknowledgedAddress_7bit;
 
-    if (pDev->overClock) {
+/*    if (pDev->overClock) {
         i2cInit.I2C_ClockSpeed = 800000; // 800khz Maximum speed tested on various boards without issues
-    } else {
+    } else {*/
         i2cInit.I2C_ClockSpeed = 400000; // 400khz Operation according specs
-    }
+    //}
 
     I2C_Cmd(I2Cx, ENABLE);
     I2C_Init(I2Cx, &i2cInit);
