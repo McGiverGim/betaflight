@@ -41,14 +41,22 @@
 #define IST8308_ADDRESS                                 0x0C
 
 #define IST8308_REG_WHOAMI                              0x00
-#define IST8308_CHIP_ID                                 0x08
+#define     IST8308_CHIP_ID                             0x08
+
+#define IST8308_REG_DATA                                0x11    // XYZ High&Low
 
 
-#define IST8308_REG_DATA                                0x11
+// Noise suppression filtering
+#define IST8308_REG_CNTRL1                              0x30    // Control setting register 1
+//bit6~bit5
+#define     IST8308_NSF_DISABLE                         0x00
+#define     IST8308_NSF_LOW                             0x20
+#define     IST8308_NSF_MIDDLE                          0x40
+#define     IST8308_NSF_HIGH                            0x60
 
-#define IST8308_REG_CNTRL2                              0x31    //Control setting register 2
+#define IST8308_REG_CNTRL2                              0x31    // Control setting register 2
 //bit4~bit0  Operation mode
-#define     IST8308_OPMODE_STANDBY_MODE                 0x00
+#define     IST8308_OPMODE_STANDBY_MODE                 0x00    // Default
 #define     IST8308_OPMODE_SINGLE_MODE                  0x01
 #define     IST8308_OPMODE_CONTINUOS_MODE_10HZ          0x02
 #define     IST8308_OPMODE_CONTINUOS_MODE_20HZ          0x04
@@ -60,33 +68,41 @@
 #define     IST8308_OPMODE_CONTINUOS_MODE_0_5HZ         0x0D
 #define     IST8308_OPMODE_SELF_TEST_MODE               0x10
 
-#define IST8308_REG_CNTRL1                              0x30    //Control setting register 1
-//bit6~bit5
-#define     IST8308_NSF_DISABLE                         0x00
-#define     IST8308_NSF_LOW                             0x20
-#define     IST8308_NSF_MIDDLE                          0x40
-#define     IST8308_NSF_HIGH                            0x60
-
+// Over sampling ratio
+#define IST8308_REG_OSR_CNTRL                           0x41    //Average control register
+//bit2~bit0
+#define     IST8308_X_Z_SENSOR_OSR_1                    0x00
+#define     IST8308_X_Z_SENSOR_OSR_2                    0x01
+#define     IST8308_X_Z_SENSOR_OSR_4                    0x02
+#define     IST8308_X_Z_SENSOR_OSR_8                    0x03
+#define     IST8308_X_Z_SENSOR_OSR_16                   0x04    //Default (ODRmax=100Hz)
+#define     IST8308_X_Z_SENSOR_OSR_32                   0x05
+//bit5~bit3
+#define     IST8308_Y_SENSOR_OSR_1                      (0x00<<3)
+#define     IST8308_Y_SENSOR_OSR_2                      (0x01<<3)
+#define     IST8308_Y_SENSOR_OSR_4                      (0x02<<3)
+#define     IST8308_Y_SENSOR_OSR_8                      (0x03<<3)
+#define     IST8308_Y_SENSOR_OSR_16                     (0x04<<3)   //Default (ODRmax=100Hz)
+#define     IST8308_Y_SENSOR_OSR_32                     (0x05<<3)
 
 static bool ist8308Init(magDev_t * magDev)
 {
 
     busDevice_t *busdev = &magDev->busdev;
 
-    // Set continous mode
-    uint8_t regTemp;
-    bool ack = busReadRegisterBuffer(busdev, IST8308_REG_CNTRL2, &regTemp, 1);
-    regTemp &= ~0x1F;
-    regTemp |= (IST8308_OPMODE_CONTINUOS_MODE_50HZ & 0x1F);
-    ack = ack && busWriteRegister(busdev, IST8308_REG_CNTRL2, regTemp);
+    bool ack =   busWriteRegister(busdev, IST8308_REG_OSR_CNTRL, IST8308_X_Z_SENSOR_OSR_16 | IST8308_Y_SENSOR_OSR_16);
+    ack = ack && busWriteRegister(busdev, IST8308_REG_CNTRL1,    IST8308_NSF_LOW);
+    ack = ack && busWriteRegister(busdev, IST8308_REG_CNTRL2,    IST8308_OPMODE_CONTINUOS_MODE_50HZ);
 
-    delay(30);
+    delay(5);
 
     return ack;
 }
 
 static bool ist8308Read(magDev_t *magDev, int16_t *magData)
 {
+    const int LSB2FSV = 3; // 3mG - 14 bit
+
     uint8_t buf[6];
 
     busDevice_t *busdev = &magDev->busdev;
@@ -101,9 +117,9 @@ static bool ist8308Read(magDev_t *magDev, int16_t *magData)
         return false;
     }
 
-    magData[X] = (int16_t)(buf[1] << 8 | buf[0]);
-    magData[Y] = (int16_t)(buf[3] << 8 | buf[2]);
-    magData[Z] = (int16_t)(buf[5] << 8 | buf[4]);
+    magData[X] = (int16_t)(buf[1] << 8 | buf[0]) * LSB2FSV;
+    magData[Y] = (int16_t)(buf[3] << 8 | buf[2]) * LSB2FSV;
+    magData[Z] = (int16_t)(buf[5] << 8 | buf[4]) * LSB2FSV;
 
     return true;
 }
