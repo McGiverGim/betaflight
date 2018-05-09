@@ -138,6 +138,7 @@ void resetPidProfile(pidProfile_t *pidProfile)
         .throttle_boost = 0,
         .throttle_boost_cutoff = 15,
         .iterm_rotation = false,
+        .iterm_decreasing_mult = 1000,
     );
 }
 
@@ -307,6 +308,7 @@ static FAST_RAM float itermLimit;
 FAST_RAM float throttleBoost;
 pt1Filter_t throttleLpf;
 static FAST_RAM bool itermRotation;
+static FAST_RAM float iterm_decreasing_mult;
 
 void pidInitConfig(const pidProfile_t *pidProfile)
 {
@@ -343,6 +345,7 @@ void pidInitConfig(const pidProfile_t *pidProfile)
     itermLimit = pidProfile->itermLimit;
     throttleBoost = pidProfile->throttle_boost * 0.1f;
     itermRotation = pidProfile->iterm_rotation == 1;
+    iterm_decreasing_mult = pidProfile->iterm_decreasing_mult / 1000;
 }
 
 void pidInit(const pidProfile_t *pidProfile)
@@ -609,7 +612,15 @@ void pidController(const pidProfile_t *pidProfile, const rollAndPitchTrims_t *an
 
         // -----calculate I component
         const float ITerm = pidData[axis].I;
-        const float ITermNew = constrainf(ITerm + pidCoefficient[axis].Ki * errorRate * dynCi, -itermLimit, itermLimit);
+        float ITermChange = pidCoefficient[axis].Ki * errorRate * dynCi;
+        // Accelerate the ITerm when decreasing
+        if (iterm_decreasing_mult > 1.0f) {
+            if (((ITerm > 0) && (ITermChange < 0)) || ((ITerm < 0) && (ITermChange > 0))) {
+                ITermChange *= iterm_decreasing_mult;
+            }
+        }
+        const float ITermNew = constrainf(ITerm + ITermChange, -itermLimit, itermLimit);
+
         const bool outputSaturated = mixerIsOutputSaturated(axis, errorRate);
         if (outputSaturated == false || ABS(ITermNew) < ABS(ITerm)) {
             // Only increase ITerm if output is not saturated
