@@ -57,6 +57,16 @@
 #undef USE_SERIALRX_SPEKTRUM
 #undef USE_SERIALRX_IBUS
 #undef USE_TELEMETRY_SRXL
+
+// Mis modificaciones - Inicio
+#undef USE_BLACKBOX
+#undef USE_SERVOS
+#define USE_BOARD_INFO
+#define USE_RTC_TIME
+#define USE_EXTENDED_CMS_MENUS
+#define USE_AIRMODE_LPF
+#define USE_OSD_PROFILES
+// Mis modificaciones - Fin
 #endif
 
 #define ENABLE_DSHOT_DMAR       true
