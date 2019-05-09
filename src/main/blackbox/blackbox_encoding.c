@@ -493,6 +493,38 @@ void blackboxWriteTag8_8SVB(int32_t *values, int valueCount)
     }
 }
 
+/**
+ * Write `valueCount` fields from `values` to the Blackbox using unsigned 8 bit. A 1-byte header is
+ * written first which specifies which 8 bit fields are non-zero (so this encoding is compact when most fields are zero, like flags until 64bit).
+ *
+ * valueCount must be 8 or less.
+ */
+void blackboxWriteTag8_8U8(uint8_t *values, int valueCount)
+{
+    uint8_t header;
+
+    if (valueCount > 0) {
+
+        //First write a one-byte header that marks which 8 bit fields are non-zero
+        header = 0;
+        for (int i = 0; i < valueCount; i++) {
+
+            if (values[i] != 0) {
+                header |= 0x01 << (valueCount - 1 - i);
+            }
+        }
+
+        blackboxWrite(header);
+
+        for (int i = 0; i < valueCount; i++) {
+            if (values[i] != 0) {
+                blackboxWrite(values[i]);
+            }
+        }
+
+    }
+}
+
 /** Write unsigned integer **/
 void blackboxWriteU32(int32_t value)
 {

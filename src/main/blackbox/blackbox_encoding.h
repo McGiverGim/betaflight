@@ -32,5 +32,6 @@ void blackboxWriteTag2_3S32(int32_t *values);
 int blackboxWriteTag2_3SVariable(int32_t *values);
 void blackboxWriteTag8_4S16(int32_t *values);
 void blackboxWriteTag8_8SVB(int32_t *values, int valueCount);
+void blackboxWriteTag8_8U8(uint8_t *values, int valueCount);
 void blackboxWriteU32(int32_t value);
 void blackboxWriteFloat(float value);

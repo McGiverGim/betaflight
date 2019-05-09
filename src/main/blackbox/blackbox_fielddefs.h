@@ -97,6 +97,7 @@ typedef enum FlightLogFieldEncoding {
     FLIGHT_LOG_FIELD_ENCODING_SIGNED_VB       = 0, // Signed variable-byte
     FLIGHT_LOG_FIELD_ENCODING_UNSIGNED_VB     = 1, // Unsigned variable-byte
     FLIGHT_LOG_FIELD_ENCODING_NEG_14BIT       = 3, // Unsigned variable-byte but we negate the value before storing, value is 14 bits
+    FLIGHT_LOG_FIELD_ENCODING_TAG8_8U8        = 5,
     FLIGHT_LOG_FIELD_ENCODING_TAG8_8SVB       = 6,
     FLIGHT_LOG_FIELD_ENCODING_TAG2_3S32       = 7,
     FLIGHT_LOG_FIELD_ENCODING_TAG8_4S16       = 8,
@@ -114,8 +115,8 @@ typedef struct flightLogEvent_syncBeep_s {
 } flightLogEvent_syncBeep_t;
 
 typedef struct flightLogEvent_flightMode_s { // New Event Data type
-    uint32_t flags;
-    uint32_t lastFlags;
+    uint32_t flags[2];
+    uint32_t lastFlags[2];
 } flightLogEvent_flightMode_t;
 
 typedef struct flightLogEvent_inflightAdjustment_s {

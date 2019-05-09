@@ -260,7 +260,7 @@ static const blackboxSimpleFieldDefinition_t blackboxGpsHFields[] = {
 
 // Rarely-updated fields
 static const blackboxSimpleFieldDefinition_t blackboxSlowFields[] = {
-    {"flightModeFlags",       -1, UNSIGNED, PREDICT(0),      ENCODING(UNSIGNED_VB)},
+    {"flightModeFlags",       -1, UNSIGNED, PREDICT(0),      ENCODING(TAG8_8U8)},
     {"stateFlags",            -1, UNSIGNED, PREDICT(0),      ENCODING(UNSIGNED_VB)},
 
     {"failsafePhase",         -1, UNSIGNED, PREDICT(0),      ENCODING(TAG2_3S32)},
@@ -326,7 +326,7 @@ typedef struct blackboxGpsState_s {
 
 // This data is updated really infrequently:
 typedef struct blackboxSlowState_s {
-    uint32_t flightModeFlags; // extend this data size (from uint16_t)
+    uint32_t flightModeFlags[2];
     uint8_t stateFlags;
     uint8_t failsafePhase;
     bool rxSignalReceived;
@@ -339,7 +339,7 @@ extern boxBitmask_t rcModeActivationMask;
 static BlackboxState blackboxState = BLACKBOX_STATE_DISABLED;
 
 static uint32_t blackboxLastArmingBeep = 0;
-static uint32_t blackboxLastFlightModeFlags = 0; // New event tracking of flight modes
+static uint32_t blackboxLastFlightModeFlags[2] = {0, 0}; // New event tracking of flight modes
 
 static struct {
     uint32_t headerIndex;
@@ -761,7 +761,7 @@ static void writeSlowFrame(void)
 
     blackboxWrite('S');
 
-    blackboxWriteUnsignedVB(slowHistory.flightModeFlags);
+    blackboxWriteTag8_8U8((uint8_t *)slowHistory.flightModeFlags, 8);
     blackboxWriteUnsignedVB(slowHistory.stateFlags);
 
     /*
@@ -1419,8 +1419,8 @@ void blackboxLogEvent(FlightLogEvent event, flightLogEventData_t *data)
         blackboxWriteUnsignedVB(data->syncBeep.time);
         break;
     case FLIGHT_LOG_EVENT_FLIGHTMODE: // New flightmode flags write
-        blackboxWriteUnsignedVB(data->flightMode.flags);
-        blackboxWriteUnsignedVB(data->flightMode.lastFlags);
+        blackboxWriteTag8_8U8((uint8_t *)data->flightMode.flags, 8);
+        blackboxWriteTag8_8U8((uint8_t *)data->flightMode.lastFlags, 8);
         break;
     case FLIGHT_LOG_EVENT_INFLIGHT_ADJUSTMENT:
         if (data->inflightAdjustment.floatFlag) {
@@ -1460,7 +1460,7 @@ static void blackboxCheckAndLogFlightMode(void)
     // Use != so that we can still detect a change if the counter wraps
     if (memcmp(&rcModeActivationMask, &blackboxLastFlightModeFlags, sizeof(blackboxLastFlightModeFlags))) {
         flightLogEvent_flightMode_t eventData; // Add new data for current flight mode flags
-        eventData.lastFlags = blackboxLastFlightModeFlags;
+        memcpy(&eventData.lastFlags, &blackboxLastFlightModeFlags, sizeof(eventData.lastFlags));
         memcpy(&blackboxLastFlightModeFlags, &rcModeActivationMask, sizeof(blackboxLastFlightModeFlags));
         memcpy(&eventData.flags, &rcModeActivationMask, sizeof(eventData.flags));
         blackboxLogEvent(FLIGHT_LOG_EVENT_FLIGHTMODE, (flightLogEventData_t *)&eventData);
