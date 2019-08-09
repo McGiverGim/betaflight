@@ -42,8 +42,8 @@
 #endif
 
 // check value for MSP_SET_VTX_CONFIG to determine if value is encoded
-// band/channel or frequency in MHz (3 bits for band and 3 bits for channel)
-#define VTXCOMMON_MSP_BANDCHAN_CHKVAL ((uint16_t)((7 << 3) + 7))
+// band/channel or frequency in MHz
+#define VTXCOMMON_MSP_BANDCHAN_CHKVAL ((uint16_t)((8 * 8) + 8))
 
 typedef enum {
     VTXDEV_UNSUPPORTED = 0, // reserved for MSP
