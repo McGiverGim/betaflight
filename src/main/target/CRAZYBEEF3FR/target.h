@@ -66,10 +66,14 @@
 #define USE_EXTENDED_CMS_MENUS
 #define USE_AIRMODE_LPF
 #define USE_OSD_PROFILES
+#define USE_DSHOT_TELEMETRY
+#define USE_DSHOT_TELEMETRY_STATS
+#define USE_RPM_FILTER
+#define USE_RX_LINK_QUALITY_INFO
 // Mis modificaciones - Fin
 #endif
 
-#define ENABLE_DSHOT_DMAR       DSHOT_DMAR_ON
+#define ENABLE_DSHOT_DMAR       DSHOT_DMAR_OFF
 
 #define LED0_PIN                PB3
 #define USE_BEEPER 
