@@ -1,0 +1,41 @@
+name: Feature Request
+about: Suggest an idea for for a new feature for Betaflight
+title: ""
+labels: "Template: Feature Request"
+issue_body: true
+inputs:
+  - type: description
+    attributes:
+      value: |
+        Please note that feature requests are not 'fire and forget'. 
+
+        It is a lot more likely that the feature you would like to have will be implemented 
+        if you keep watching your feature request, and provide more details to developers 
+        looking into implementing your feature, and help them with testing.
+  - type: textarea
+    attributes:
+      label: Is your feature request related to a problem? Please describe
+      required: true
+      description: |
+        A clear and concise description of what the problem is. 
+        Ex. I'm always frustrated when [...]
+  - type: textarea
+    attributes:
+      label: Describe the solution you'd like
+      required: true
+      description: >-
+        A clear and concise description of what you want to happen.
+  - type: textarea
+    attributes:
+      label: Describe alternatives you've considered
+      required: true
+      description: >-
+        A clear and concise description of any alternative solutions or features you've considered.
+  - type: description
+    attributes:
+      value: |
+        #### Additional information
+
+        Add any other context or screenshots about the feature request that you think might be relevant here.
+        
+        Please note, you can attach screenshots or any other file dragging and dropping files in the field below.
